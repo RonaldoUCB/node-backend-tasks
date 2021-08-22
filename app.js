@@ -19,6 +19,10 @@ app.use((req,res,next)=>{
 
 var tasks = []
 
+app.get("/",(req,res,next) => {
+    res.status(200).json("Bienvenido");
+});
+
 app.get("/tasks", (req, res, next) => {
     res.status(200).json({
         message: "Listado OK",
@@ -29,6 +33,12 @@ app.get("/tasks", (req, res, next) => {
 app.get("/tasks/:id", (req, res, next) => {
         const id = req.params.id
         const obj = tasks.find(o => o.id == id);
+        if(typeof obj === 'undefined'){
+            return res.status(500).json({
+                error: 'GET error',
+                message: 'No se puedo encontrar la tarea con este id'
+            });
+        }
         res.status(200).json({
             message: "Obtener OK",
             object: obj
@@ -47,7 +57,16 @@ app.post("/tasks", (req, res, next) => {
 app.put("/tasks/:id", (req, res, next) => {
     const id = req.params.id
     const state = req.query.state
-    if(state==null){
+
+    const obj = tasks.find(o => o.id == id);
+    if(typeof obj === 'undefined'){
+        return res.status(500).json({
+            error: 'PUT error',
+            message: 'No se puedo encontrar la tarea con este id'
+        });
+    }
+
+    if(typeof state == 'undefined'){
         const ind = tasks.findIndex(o => o.id == id);
         tasks[ind] = req.body
         tasks[ind].id = id
@@ -77,6 +96,15 @@ app.put("/tasks/:id", (req, res, next) => {
 app.delete("/tasks/:id", (req, res, next) => {
     const id = req.params.id
     const ind = tasks.findIndex(o => o.id == id);
+
+    const obj = tasks.find(o => o.id == id);
+    if(typeof obj === 'undefined'){
+        return res.status(500).json({
+            error: 'DELETE error',
+            message: 'No se puedo encontrar la tarea con este id'
+        });
+    }
+    
     tasks.splice(ind, 1);
     res.status(200).json({
         message: "Eliminado OK"
